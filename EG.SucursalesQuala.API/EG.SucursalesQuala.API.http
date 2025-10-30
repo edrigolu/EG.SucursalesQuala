@@ -1,0 +1,6 @@
+@EG.SucursalesQuala.API_HostAddress = http://localhost:5171
+
+GET {{EG.SucursalesQuala.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
