@@ -1,4 +1,6 @@
-﻿namespace EG.SucursalesQuala.Application.DTOs
+﻿using EG.SucursalesQuala.Domain.Entities;
+
+namespace EG.SucursalesQuala.Application.DTOs
 {
     public class UsuarioDto
     {

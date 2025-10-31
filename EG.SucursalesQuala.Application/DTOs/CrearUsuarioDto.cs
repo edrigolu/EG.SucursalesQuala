@@ -8,4 +8,5 @@
         public string Clave { get; set; } = null!;
         public int IdRol { get; set; }
     }
+
 }
