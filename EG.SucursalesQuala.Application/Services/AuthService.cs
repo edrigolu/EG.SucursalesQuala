@@ -31,7 +31,7 @@ namespace EG.SucursalesQuala.Application.Services
             string claveEncriptada = _encriptacionService.Encriptar(request.Clave);
             Usuario? usuario = await _repositorioUsuario.ObtenerPorEmailYClaveAsync(request.Correo, claveEncriptada);
 
-            if (usuario == null)
+            if (usuario! == null)
             {
                 throw new UnauthorizedAccessException("Credenciales inválidas");
             }
