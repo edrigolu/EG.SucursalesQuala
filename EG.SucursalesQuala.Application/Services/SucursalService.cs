@@ -27,8 +27,8 @@ namespace EG.SucursalesQuala.Application.Services
                 Identificacion = s.Identificacion,
                 FechaCreacion = s.FechaCreacion,
                 IdMoneda = s.IdMoneda,
-                NombreMoneda = s.Moneda?.Nombre,
-                SimboloMoneda = s.Moneda?.Simbolo,
+                NombreMoneda = s.NombreMoneda,
+                SimboloMoneda = s.SimboloMoneda,
                 Estado = s.Estado
             });
         }
@@ -36,7 +36,10 @@ namespace EG.SucursalesQuala.Application.Services
         public async Task<SucursalDto?> ObtenerPorIdAsync(int id)
         {
             Sucursal? sucursal = await _repositorioSucursal.ObtenerPorIdConMonedaAsync(id);
-            if (sucursal == null) return null;
+            if (sucursal == null)
+            {
+                return null;
+            }
 
             return new SucursalDto
             {
@@ -57,10 +60,14 @@ namespace EG.SucursalesQuala.Application.Services
         public async Task<SucursalDto> CrearAsync(CrearSucursalDto crearSucursalDto)
         {
             if (await _repositorioSucursal.ExisteCodigoAsync(crearSucursalDto.Codigo))
+            {
                 throw new InvalidOperationException("El código de sucursal ya existe");
+            }
 
             if (await _repositorioSucursal.ExisteIdentificacionAsync(crearSucursalDto.Identificacion))
+            {
                 throw new InvalidOperationException("La identificación ya existe");
+            }
 
             Sucursal sucursal = new Sucursal
             {
@@ -69,7 +76,7 @@ namespace EG.SucursalesQuala.Application.Services
                 Descripcion = crearSucursalDto.Descripcion,
                 Direccion = crearSucursalDto.Direccion,
                 Identificacion = crearSucursalDto.Identificacion,
-                FechaCreacion = crearSucursalDto.FechaCreacion,
+                FechaCreacion = DateTime.Now,
                 IdMoneda = crearSucursalDto.IdMoneda,
                 Estado = true
             };
@@ -93,23 +100,29 @@ namespace EG.SucursalesQuala.Application.Services
         public async Task ActualizarAsync(ActualizarSucursalDto actualizarSucursalDto)
         {
             if (await _repositorioSucursal.ExisteCodigoAsync(actualizarSucursalDto.Codigo, actualizarSucursalDto.Id))
+            {
                 throw new InvalidOperationException("El código de sucursal ya existe");
+            }
 
             if (await _repositorioSucursal.ExisteIdentificacionAsync(actualizarSucursalDto.Identificacion, actualizarSucursalDto.Id))
+            {
                 throw new InvalidOperationException("La identificación ya existe");
+            }
 
             Sucursal? sucursalExistente = await _repositorioSucursal.ObtenerPorIdAsync(actualizarSucursalDto.Id);
             if (sucursalExistente == null)
+            {
                 throw new KeyNotFoundException("Sucursal no encontrada");
+            }
 
             sucursalExistente.Codigo = actualizarSucursalDto.Codigo;
             sucursalExistente.Nombre = actualizarSucursalDto.Nombre;
             sucursalExistente.Descripcion = actualizarSucursalDto.Descripcion;
             sucursalExistente.Direccion = actualizarSucursalDto.Direccion;
             sucursalExistente.Identificacion = actualizarSucursalDto.Identificacion;
-            sucursalExistente.FechaCreacion = actualizarSucursalDto.FechaCreacion;
+            sucursalExistente.FechaCreacion = DateTime.Now;
             sucursalExistente.IdMoneda = actualizarSucursalDto.IdMoneda;
-            sucursalExistente.Estado = actualizarSucursalDto.Estado;
+            //sucursalExistente.Estado = actualizarSucursalDto.Estado;
 
             await _repositorioSucursal.ActualizarAsync(sucursalExistente);
         }

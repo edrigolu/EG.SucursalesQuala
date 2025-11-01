@@ -13,6 +13,13 @@ namespace EG.SucursalesQuala.Infrastructure.Repositories
         protected override DynamicParameters MapToParameters(Usuario entidad)
         {
             var parameters = new DynamicParameters();
+
+            // Solo agregar @Id si es diferente de 0 (actualización)
+            if (entidad.Id != 0)
+            {
+                parameters.Add("@Id", entidad.Id);
+            }
+
             parameters.Add("Codigo", entidad.Codigo);
             parameters.Add("Nombre", entidad.Nombre);
             parameters.Add("Correo", entidad.Correo);

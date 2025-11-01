@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using EG.SucursalesQuala.Application.DTOs;
+﻿using EG.SucursalesQuala.Application.DTOs;
 using EG.SucursalesQuala.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using System.Text.Json;
 
 namespace EG.SucursalesQuala.API.Controllers
 {
@@ -29,7 +31,9 @@ namespace EG.SucursalesQuala.API.Controllers
         {
             var sucursal = await _sucursalService.ObtenerPorIdAsync(id);
             if (sucursal == null)
+            {
                 return NotFound();
+            }
 
             return Ok(sucursal);
         }
@@ -41,7 +45,9 @@ namespace EG.SucursalesQuala.API.Controllers
             {
                 // Validar que la fecha no sea anterior a la actual
                 if (crearSucursalDto.FechaCreacion < DateTime.Today)
+                {
                     return BadRequest(new { message = "La fecha de creación no puede ser anterior a la fecha actual" });
+                }
 
                 var sucursalCreada = await _sucursalService.CrearAsync(crearSucursalDto);
                 return CreatedAtAction(nameof(Get), new { id = sucursalCreada.Id }, sucursalCreada);
@@ -56,20 +62,29 @@ namespace EG.SucursalesQuala.API.Controllers
             }
         }
 
+      
+
         [HttpPut("{id}")]
         public async Task<ActionResult> Put(int id, [FromBody] ActualizarSucursalDto actualizarSucursalDto)
         {
+            Console.WriteLine($"ID recibido: {id}");
+            Console.WriteLine($"ID en DTO: {actualizarSucursalDto.Id}");
+            Console.WriteLine($"Datos recibidos: {JsonSerializer.Serialize(actualizarSucursalDto)}");
+
             if (id != actualizarSucursalDto.Id)
+            {
                 return BadRequest(new { message = "ID no coincide" });
+            }
 
             try
             {
-                // Validar que la fecha no sea anterior a la actual
-                if (actualizarSucursalDto.FechaCreacion < DateTime.Today)
-                    return BadRequest(new { message = "La fecha de creación no puede ser anterior a la fecha actual" });
-
                 await _sucursalService.ActualizarAsync(actualizarSucursalDto);
                 return NoContent();
+            }
+            catch (SqlException ex)
+            {
+                Console.WriteLine($"Error SQL: {ex.Message}");
+                return BadRequest(new { message = $"Error de base de datos: {ex.Message}" });
             }
             catch (KeyNotFoundException ex)
             {
@@ -79,8 +94,9 @@ namespace EG.SucursalesQuala.API.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine($"Error general: {ex.Message}");
                 return BadRequest(new { message = "Error al actualizar la sucursal" });
             }
         }

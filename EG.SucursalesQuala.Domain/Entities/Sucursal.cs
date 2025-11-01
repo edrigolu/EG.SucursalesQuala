@@ -8,6 +8,9 @@
         public DateTime FechaCreacion { get; set; }
         public int IdMoneda { get; set; }
         public Moneda? Moneda { get; set; }
+
+        public string? NombreMoneda { get; set; }
+        public string? SimboloMoneda { get; set; }
     }
 
 }

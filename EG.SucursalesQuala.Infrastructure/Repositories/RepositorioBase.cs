@@ -40,24 +40,37 @@ namespace EG.SucursalesQuala.Infrastructure.Repositories
             string sp = $"eg_sp_{_entidad}_create";
             using var connection = _context.CreateConnection();
             var parameters = MapToParameters(entidad);
-            var result = await connection.QuerySingleAsync<int>(sp,
-                parameters,
-                commandType: CommandType.StoredProcedure);
 
-            var prop = typeof(T).GetProperty("Id");
-            prop?.SetValue(entidad, result);
-
-            return entidad;
+            try
+            {
+                var result = await connection.QuerySingleAsync<int>(sp, parameters, commandType: CommandType.StoredProcedure);
+                var prop = typeof(T).GetProperty("Id");
+                prop?.SetValue(entidad, result);
+                return entidad;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERROR en CrearAsync: {ex.Message}");
+                throw;
+            }
         }
+
 
         public async Task ActualizarAsync(T entidad)
         {
             string sp = $"eg_sp_{_entidad}_update";
             using var connection = _context.CreateConnection();
             var parameters = MapToParameters(entidad);
-            await connection.ExecuteAsync(sp,
-                parameters,
-                commandType: CommandType.StoredProcedure);
+
+            try
+            {
+                await connection.ExecuteAsync(sp, parameters, commandType: CommandType.StoredProcedure);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERROR en ActualizarAsync: {ex.Message}");
+                throw;
+            }
         }
 
         public async Task EliminarAsync(int id)

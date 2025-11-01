@@ -13,21 +13,32 @@ namespace EG.SucursalesQuala.Infrastructure.Repositories
         protected override DynamicParameters MapToParameters(Sucursal entidad)
         {
             var parameters = new DynamicParameters();
-            parameters.Add("Codigo", entidad.Codigo);
-            parameters.Add("Nombre", entidad.Nombre);
-            parameters.Add("Descripcion", entidad.Descripcion);
-            parameters.Add("Direccion", entidad.Direccion);
-            parameters.Add("Identificacion", entidad.Identificacion);
-            parameters.Add("FechaCreacion", entidad.FechaCreacion);
-            parameters.Add("IdMoneda", entidad.IdMoneda);
-            // EXCLUYE: Moneda (propiedad navegación)
-            // EXCLUYE: Estado (el SP no lo espera para crear)
+
+            // Parámetros COMUNES
+            parameters.Add("@Codigo", entidad.Codigo);
+            parameters.Add("@Nombre", entidad.Nombre);
+            parameters.Add("@Descripcion", entidad.Descripcion);
+            parameters.Add("@Direccion", entidad.Direccion);
+            parameters.Add("@Identificacion", entidad.Identificacion);
+            parameters.Add("@IdMoneda", entidad.IdMoneda);
+
+            // SOLO para CREACIÓN
+            if (entidad.Id == 0)
+            {
+                parameters.Add("@FechaCreacion", entidad.FechaCreacion);
+            }
+            // SOLO para ACTUALIZACIÓN  
+            else
+            {
+                parameters.Add("@Id", entidad.Id);
+            }
+
             return parameters;
         }
 
         public async Task<IEnumerable<Sucursal>> ObtenerConMonedaAsync()
         {
-            using var connection = _context.CreateConnection();
+            using IDbConnection connection = _context.CreateConnection();
             return await connection.QueryAsync<Sucursal>(
                 "eg_sp_sucursal_getall",
                 commandType: CommandType.StoredProcedure);
@@ -35,7 +46,7 @@ namespace EG.SucursalesQuala.Infrastructure.Repositories
 
         public async Task<Sucursal?> ObtenerPorIdConMonedaAsync(int id)
         {
-            using var connection = _context.CreateConnection();
+            using IDbConnection connection = _context.CreateConnection();
             return await connection.QueryFirstOrDefaultAsync<Sucursal>(
                 "eg_sp_sucursal_getbyid",
                 new { id },
@@ -44,8 +55,8 @@ namespace EG.SucursalesQuala.Infrastructure.Repositories
 
         public async Task<bool> ExisteCodigoAsync(string codigo, int excluirId = 0)
         {
-            using var connection = _context.CreateConnection();
-            var result = await connection.QueryFirstOrDefaultAsync<int?>(
+            using IDbConnection connection = _context.CreateConnection();
+            int? result = await connection.QueryFirstOrDefaultAsync<int?>(
                 "eg_sp_sucursal_existecodigo",
                 new { codigo, excluirId },
                 commandType: CommandType.StoredProcedure);
@@ -54,8 +65,8 @@ namespace EG.SucursalesQuala.Infrastructure.Repositories
 
         public async Task<bool> ExisteIdentificacionAsync(string identificacion, int excluirId = 0)
         {
-            using var connection = _context.CreateConnection();
-            var result = await connection.QueryFirstOrDefaultAsync<int?>(
+            using IDbConnection connection = _context.CreateConnection();
+            int? result = await connection.QueryFirstOrDefaultAsync<int?>(
                 "eg_sp_sucursal_existeidentificacion",
                 new { identificacion, excluirId },
                 commandType: CommandType.StoredProcedure);
